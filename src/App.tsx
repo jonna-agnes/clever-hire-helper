@@ -10,6 +10,10 @@ import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import ResumeScreening from "./pages/ResumeScreening";
 import ChatAssistant from "./pages/ChatAssistant";
+import LeaveManagement from "./pages/LeaveManagement";
+import JobPostings from "./pages/JobPostings";
+import Interviews from "./pages/Interviews";
+import Announcements from "./pages/Announcements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,8 +38,32 @@ const App = () => (
             <Route
               path="/employees"
               element={
-                <ProtectedRoute allowedRoles={['admin', 'hr']}>
+                <ProtectedRoute allowedRoles={['admin', 'hr', 'manager']}>
                   <Employees />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave-management"
+              element={
+                <ProtectedRoute>
+                  <LeaveManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/job-postings"
+              element={
+                <ProtectedRoute>
+                  <JobPostings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/interviews"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'hr']}>
+                  <Interviews />
                 </ProtectedRoute>
               }
             />
@@ -44,6 +72,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin', 'hr']}>
                   <ResumeScreening />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/announcements"
+              element={
+                <ProtectedRoute>
+                  <Announcements />
                 </ProtectedRoute>
               }
             />

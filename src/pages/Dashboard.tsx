@@ -1,7 +1,7 @@
 import { useAuth } from '@/lib/auth';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, ClipboardList, TrendingUp, BrainCircuit, Calendar, FileText } from 'lucide-react';
+import { Users, ClipboardList, TrendingUp, BrainCircuit, Calendar, FileText, Megaphone } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -45,6 +45,30 @@ const Dashboard = () => {
     },
   });
 
+  const { data: pendingLeaves } = useQuery({
+    queryKey: ['pending-leaves'],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('leave_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      return count || 0;
+    },
+    enabled: userRole === 'admin' || userRole === 'hr' || userRole === 'manager',
+  });
+
+  const { data: announcements } = useQuery({
+    queryKey: ['recent-announcements'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+      return data || [];
+    },
+  });
+
   const { data: myEmployee } = useQuery({
     queryKey: ['my-employee', user?.id],
     queryFn: async () => {
@@ -74,64 +98,84 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {(userRole === 'admin' || userRole === 'hr') && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
-                <Users className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                {loadingEmployees ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <div className="text-2xl font-bold">{employeesCount}</div>
-                )}
-                <p className="text-xs text-muted-foreground">Active workforce</p>
-              </CardContent>
-            </Card>
+        {(userRole === 'admin' || userRole === 'hr' || userRole === 'manager') && (
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+                  <Users className="h-4 w-4 text-primary" />
+                </CardHeader>
+                <CardContent>
+                  {loadingEmployees ? (
+                    <Skeleton className="h-8 w-20" />
+                  ) : (
+                    <div className="text-2xl font-bold">{employeesCount}</div>
+                  )}
+                  <p className="text-xs text-muted-foreground">Active workforce</p>
+                </CardContent>
+              </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Present Today</CardTitle>
-                <ClipboardList className="h-4 w-4 text-success" />
-              </CardHeader>
-              <CardContent>
-                {loadingAttendance ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <div className="text-2xl font-bold">{todayAttendance}</div>
-                )}
-                <p className="text-xs text-muted-foreground">Attendance count</p>
-              </CardContent>
-            </Card>
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Present Today</CardTitle>
+                  <ClipboardList className="h-4 w-4 text-success" />
+                </CardHeader>
+                <CardContent>
+                  {loadingAttendance ? (
+                    <Skeleton className="h-8 w-20" />
+                  ) : (
+                    <div className="text-2xl font-bold">{todayAttendance}</div>
+                  )}
+                  <p className="text-xs text-muted-foreground">Attendance count</p>
+                </CardContent>
+              </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-                <FileText className="h-4 w-4 text-warning" />
-              </CardHeader>
-              <CardContent>
-                {loadingReviews ? (
-                  <Skeleton className="h-8 w-20" />
-                ) : (
-                  <div className="text-2xl font-bold">{pendingReviews}</div>
-                )}
-                <p className="text-xs text-muted-foreground">Need attention</p>
-              </CardContent>
-            </Card>
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pending Leaves</CardTitle>
+                  <Calendar className="h-4 w-4 text-warning" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{pendingLeaves || 0}</div>
+                  <p className="text-xs text-muted-foreground">Awaiting approval</p>
+                </CardContent>
+              </Card>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow bg-gradient-accent">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">AI Features</CardTitle>
-                <BrainCircuit className="h-4 w-4 text-white" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">Active</div>
-                <p className="text-xs text-white/80">Resume & Chat AI</p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card className="shadow-md hover:shadow-lg transition-shadow bg-gradient-accent">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-white">AI Features</CardTitle>
+                  <BrainCircuit className="h-4 w-4 text-white" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-white">Active</div>
+                  <p className="text-xs text-white/80">Resume & Chat AI</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {announcements && announcements.length > 0 && (
+              <Card className="mb-8 shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Megaphone className="w-5 h-5" />
+                    Recent Announcements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {announcements.map((announcement: any) => (
+                    <div key={announcement.id} className="border-l-2 border-primary pl-4">
+                      <h4 className="font-medium">{announcement.title}</h4>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{announcement.content}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {new Date(announcement.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
 
         {userRole === 'employee' && myEmployee && (
@@ -202,6 +246,15 @@ const Dashboard = () => {
                   </a>
                 </>
               )}
+              <a href="/leave-management" className="block p-3 rounded-lg hover:bg-muted transition-colors">
+                <div className="flex items-center space-x-3">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-medium">Leave Management</p>
+                    <p className="text-sm text-muted-foreground">View and manage leave requests</p>
+                  </div>
+                </div>
+              </a>
               <a href="/chat-assistant" className="block p-3 rounded-lg hover:bg-muted transition-colors">
                 <div className="flex items-center space-x-3">
                   <BrainCircuit className="w-5 h-5 text-accent" />

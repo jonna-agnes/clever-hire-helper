@@ -1,6 +1,6 @@
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
-import { Briefcase, LayoutDashboard, Users, ClipboardList, FileText, BrainCircuit, MessageSquare, LogOut } from 'lucide-react';
+import { Briefcase, LayoutDashboard, Users, ClipboardList, FileText, BrainCircuit, MessageSquare, LogOut, Calendar, Megaphone, UserCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export const Navigation = () => {
@@ -34,7 +34,7 @@ export const Navigation = () => {
               </Link>
             </Button>
 
-            {(userRole === 'admin' || userRole === 'hr') && (
+            {(userRole === 'admin' || userRole === 'hr' || userRole === 'manager') && (
               <>
                 <Button
                   variant={isActive('/employees') ? 'default' : 'ghost'}
@@ -47,13 +47,38 @@ export const Navigation = () => {
                   </Link>
                 </Button>
                 <Button
-                  variant={isActive('/attendance') ? 'default' : 'ghost'}
+                  variant={isActive('/leave-management') ? 'default' : 'ghost'}
                   size="sm"
                   asChild
                 >
-                  <Link to="/attendance">
-                    <ClipboardList className="w-4 h-4 mr-2" />
-                    Attendance
+                  <Link to="/leave-management">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Leaves
+                  </Link>
+                </Button>
+              </>
+            )}
+
+            {(userRole === 'admin' || userRole === 'hr') && (
+              <>
+                <Button
+                  variant={isActive('/job-postings') ? 'default' : 'ghost'}
+                  size="sm"
+                  asChild
+                >
+                  <Link to="/job-postings">
+                    <Briefcase className="w-4 h-4 mr-2" />
+                    Jobs
+                  </Link>
+                </Button>
+                <Button
+                  variant={isActive('/interviews') ? 'default' : 'ghost'}
+                  size="sm"
+                  asChild
+                >
+                  <Link to="/interviews">
+                    <UserCircle className="w-4 h-4 mr-2" />
+                    Interviews
                   </Link>
                 </Button>
                 <Button
@@ -69,14 +94,27 @@ export const Navigation = () => {
               </>
             )}
 
+            {userRole === 'employee' && (
+              <Button
+                variant={isActive('/leave-management') ? 'default' : 'ghost'}
+                size="sm"
+                asChild
+              >
+                <Link to="/leave-management">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  My Leaves
+                </Link>
+              </Button>
+            )}
+
             <Button
-              variant={isActive('/performance') ? 'default' : 'ghost'}
+              variant={isActive('/announcements') ? 'default' : 'ghost'}
               size="sm"
               asChild
             >
-              <Link to="/performance">
-                <FileText className="w-4 h-4 mr-2" />
-                Performance
+              <Link to="/announcements">
+                <Megaphone className="w-4 h-4 mr-2" />
+                Announcements
               </Link>
             </Button>
 
