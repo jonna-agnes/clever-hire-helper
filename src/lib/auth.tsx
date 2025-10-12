@@ -44,13 +44,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (session?.user) {
           // Fetch user role after setting session
           setTimeout(async () => {
-            const { data } = await supabase
+            const { data: roleData } = await supabase
               .from('user_roles')
               .select('role')
               .eq('user_id', session.user.id)
-              .single();
+              .maybeSingle();
             
-            setUserRole(data?.role ?? null);
+            // If no role exists (new OAuth user), assign default employee role
+            if (!roleData && event === 'SIGNED_IN') {
+              await supabase
+                .from('user_roles')
+                .insert({
+                  user_id: session.user.id,
+                  role: 'employee',
+                });
+              setUserRole('employee');
+            } else {
+              setUserRole(roleData?.role ?? null);
+            }
           }, 0);
         } else {
           setUserRole(null);
@@ -69,7 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             .from('user_roles')
             .select('role')
             .eq('user_id', session.user.id)
-            .single();
+            .maybeSingle();
           
           setUserRole(data?.role ?? null);
           setLoading(false);
