@@ -35,15 +35,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
           // Fetch user role after setting session
           setTimeout(async () => {
+            if (!mounted) return;
+            
             const { data: roleData } = await supabase
               .from('user_roles')
               .select('role')
@@ -62,20 +68,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             } else {
               setUserRole(roleData?.role ?? null);
             }
+            setLoading(false);
           }, 0);
         } else {
           setUserRole(null);
+          setLoading(false);
         }
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         setTimeout(async () => {
+          if (!mounted) return;
+          
           const { data } = await supabase
             .from('user_roles')
             .select('role')
@@ -90,7 +102,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
