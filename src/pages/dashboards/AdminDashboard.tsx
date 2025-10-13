@@ -8,14 +8,29 @@ export const AdminDashboard = () => {
   const { data: stats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const [employees, jobPostings, interviews, announcements, leaveRequests, screenings] = await Promise.all([
+      const [employees, jobPostings, interviews, announcements, leaveRequests, screenings, attendance, reviews] = await Promise.all([
         supabase.from('employees').select('*', { count: 'exact' }),
         supabase.from('job_postings').select('*', { count: 'exact' }),
         supabase.from('interviews').select('*', { count: 'exact' }),
         supabase.from('announcements').select('*', { count: 'exact' }),
         supabase.from('leave_requests').select('*').eq('status', 'pending'),
         supabase.from('resume_screenings').select('*', { count: 'exact' }),
+        supabase.from('attendance').select('*').gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
+        supabase.from('performance_reviews').select('*'),
       ]);
+
+      // Calculate payroll summary (total salaries)
+      const totalPayroll = employees.data?.reduce((sum: number, emp: any) => sum + (emp.salary || 0), 0) || 0;
+      
+      // Calculate attendance rate
+      const attendanceRate = attendance.data 
+        ? (attendance.data.filter((a: any) => a.status === 'present').length / attendance.data.length * 100).toFixed(1)
+        : 0;
+
+      // Calculate average performance rating
+      const avgRating = reviews.data && reviews.data.length > 0
+        ? (reviews.data.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.data.length).toFixed(1)
+        : 0;
 
       return {
         totalEmployees: employees.count || 0,
@@ -24,6 +39,9 @@ export const AdminDashboard = () => {
         totalAnnouncements: announcements.count || 0,
         pendingLeaves: leaveRequests.data?.length || 0,
         totalScreenings: screenings.count || 0,
+        totalPayroll: `$${(totalPayroll / 1000).toFixed(0)}K`,
+        attendanceRate: `${attendanceRate}%`,
+        avgPerformance: avgRating,
       };
     },
   });
@@ -34,36 +52,56 @@ export const AdminDashboard = () => {
       value: stats?.totalEmployees || 0,
       icon: Users,
       gradient: 'bg-gradient-primary',
+      description: 'Active workforce',
+    },
+    {
+      title: 'Monthly Payroll',
+      value: stats?.totalPayroll || '$0',
+      icon: TrendingUp,
+      gradient: 'bg-gradient-accent',
+      description: 'Total compensation',
+    },
+    {
+      title: 'Attendance Rate',
+      value: stats?.attendanceRate || '0%',
+      icon: UserCheck,
+      gradient: 'bg-gradient-primary',
+      description: 'Last 30 days',
     },
     {
       title: 'Job Postings',
       value: stats?.totalJobPostings || 0,
       icon: Briefcase,
       gradient: 'bg-gradient-accent',
+      description: 'Open positions',
     },
     {
       title: 'Interviews',
       value: stats?.totalInterviews || 0,
       icon: Calendar,
       gradient: 'bg-gradient-primary',
-    },
-    {
-      title: 'Announcements',
-      value: stats?.totalAnnouncements || 0,
-      icon: FileText,
-      gradient: 'bg-gradient-accent',
+      description: 'Scheduled',
     },
     {
       title: 'Pending Leaves',
       value: stats?.pendingLeaves || 0,
-      icon: UserCheck,
-      gradient: 'bg-gradient-primary',
+      icon: FileText,
+      gradient: 'bg-gradient-accent',
+      description: 'Awaiting approval',
     },
     {
       title: 'Resume Screenings',
       value: stats?.totalScreenings || 0,
       icon: TrendingUp,
+      gradient: 'bg-gradient-primary',
+      description: 'AI analyzed',
+    },
+    {
+      title: 'Avg Performance',
+      value: `${stats?.avgPerformance || 0}/5`,
+      icon: Users,
       gradient: 'bg-gradient-accent',
+      description: 'Team rating',
     },
   ];
 
@@ -74,7 +112,7 @@ export const AdminDashboard = () => {
         <p className="text-muted-foreground">Complete system overview and management</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat, index) => (
           <Card key={index} className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -85,6 +123,7 @@ export const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
             </CardContent>
           </Card>
         ))}
