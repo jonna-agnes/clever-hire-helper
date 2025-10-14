@@ -88,6 +88,119 @@ export type Database = {
           },
         ]
       }
+      candidate_resumes: {
+        Row: {
+          ai_cultural_fit_score: number | null
+          ai_overall_score: number | null
+          ai_red_flags: string[] | null
+          ai_skill_match: Json | null
+          ai_strengths: string[] | null
+          ai_summary: string | null
+          ai_weaknesses: string[] | null
+          candidate_name: string
+          created_at: string
+          email: string
+          id: string
+          phone: string | null
+          position_applied: string
+          resume_text: string | null
+          resume_url: string
+          status: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          ai_cultural_fit_score?: number | null
+          ai_overall_score?: number | null
+          ai_red_flags?: string[] | null
+          ai_skill_match?: Json | null
+          ai_strengths?: string[] | null
+          ai_summary?: string | null
+          ai_weaknesses?: string[] | null
+          candidate_name: string
+          created_at?: string
+          email: string
+          id?: string
+          phone?: string | null
+          position_applied: string
+          resume_text?: string | null
+          resume_url: string
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          ai_cultural_fit_score?: number | null
+          ai_overall_score?: number | null
+          ai_red_flags?: string[] | null
+          ai_skill_match?: Json | null
+          ai_strengths?: string[] | null
+          ai_summary?: string | null
+          ai_weaknesses?: string[] | null
+          candidate_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          phone?: string | null
+          position_applied?: string
+          resume_text?: string | null
+          resume_url?: string
+          status?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      employee_resumes: {
+        Row: {
+          ai_attrition_risk: string | null
+          ai_career_path: Json | null
+          ai_learning_roadmap: Json | null
+          ai_promotion_probability: number | null
+          ai_skill_gaps: string[] | null
+          created_at: string
+          employee_id: string
+          id: string
+          resume_text: string | null
+          resume_url: string
+          updated_at: string
+        }
+        Insert: {
+          ai_attrition_risk?: string | null
+          ai_career_path?: Json | null
+          ai_learning_roadmap?: Json | null
+          ai_promotion_probability?: number | null
+          ai_skill_gaps?: string[] | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          resume_text?: string | null
+          resume_url: string
+          updated_at?: string
+        }
+        Update: {
+          ai_attrition_risk?: string | null
+          ai_career_path?: Json | null
+          ai_learning_roadmap?: Json | null
+          ai_promotion_probability?: number | null
+          ai_skill_gaps?: string[] | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          resume_text?: string | null
+          resume_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_resumes_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           created_at: string
@@ -135,6 +248,121 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      hr_collaboration_notes: {
+        Row: {
+          ai_summary: string | null
+          author_id: string
+          candidate_resume_id: string | null
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          author_id: string
+          candidate_resume_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          author_id?: string
+          candidate_resume_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_collaboration_notes_candidate_resume_id_fkey"
+            columns: ["candidate_resume_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_job_recommendations: {
+        Row: {
+          ai_match_score: number | null
+          ai_reasoning: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          job_posting_id: string
+        }
+        Insert: {
+          ai_match_score?: number | null
+          ai_reasoning?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          job_posting_id: string
+        }
+        Update: {
+          ai_match_score?: number | null
+          ai_reasoning?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          job_posting_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_job_recommendations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_job_recommendations_job_posting_id_fkey"
+            columns: ["job_posting_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_questions: {
+        Row: {
+          candidate_resume_id: string | null
+          created_at: string
+          generated_by: string | null
+          id: string
+          position: string
+          questions: Json
+        }
+        Insert: {
+          candidate_resume_id?: string | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          position: string
+          questions: Json
+        }
+        Update: {
+          candidate_resume_id?: string | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          position?: string
+          questions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_questions_candidate_resume_id_fkey"
+            columns: ["candidate_resume_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_resumes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       interviews: {
         Row: {
@@ -230,6 +458,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      learning_recommendations: {
+        Row: {
+          ai_reasoning: string | null
+          course_name: string
+          course_url: string | null
+          created_at: string
+          employee_id: string
+          estimated_hours: number | null
+          id: string
+          platform: string
+          priority: string
+          skill: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ai_reasoning?: string | null
+          course_name: string
+          course_url?: string | null
+          created_at?: string
+          employee_id: string
+          estimated_hours?: number | null
+          id?: string
+          platform: string
+          priority?: string
+          skill: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ai_reasoning?: string | null
+          course_name?: string
+          course_url?: string | null
+          created_at?: string
+          employee_id?: string
+          estimated_hours?: number | null
+          id?: string
+          platform?: string
+          priority?: string
+          skill?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_recommendations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leave_requests: {
         Row: {
@@ -358,6 +639,45 @@ export type Database = {
         }
         Relationships: []
       }
+      recruitment_metrics: {
+        Row: {
+          ai_candidate_quality_avg: number | null
+          ai_insights: string | null
+          ai_predicted_time_to_hire: number | null
+          created_at: string
+          hired: number | null
+          id: string
+          interviewed: number | null
+          screened: number | null
+          total_applications: number | null
+          week_start: string
+        }
+        Insert: {
+          ai_candidate_quality_avg?: number | null
+          ai_insights?: string | null
+          ai_predicted_time_to_hire?: number | null
+          created_at?: string
+          hired?: number | null
+          id?: string
+          interviewed?: number | null
+          screened?: number | null
+          total_applications?: number | null
+          week_start: string
+        }
+        Update: {
+          ai_candidate_quality_avg?: number | null
+          ai_insights?: string | null
+          ai_predicted_time_to_hire?: number | null
+          created_at?: string
+          hired?: number | null
+          id?: string
+          interviewed?: number | null
+          screened?: number | null
+          total_applications?: number | null
+          week_start?: string
+        }
+        Relationships: []
+      }
       resume_screenings: {
         Row: {
           ai_analysis: string | null
@@ -402,6 +722,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sentiment_tracking: {
+        Row: {
+          ai_analysis: string | null
+          created_at: string
+          date: string
+          employee_id: string
+          id: string
+          mood: string
+          notes: string | null
+          sentiment_score: number | null
+        }
+        Insert: {
+          ai_analysis?: string | null
+          created_at?: string
+          date?: string
+          employee_id: string
+          id?: string
+          mood: string
+          notes?: string | null
+          sentiment_score?: number | null
+        }
+        Update: {
+          ai_analysis?: string | null
+          created_at?: string
+          date?: string
+          employee_id?: string
+          id?: string
+          mood?: string
+          notes?: string | null
+          sentiment_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentiment_tracking_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

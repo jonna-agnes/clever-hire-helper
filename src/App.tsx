@@ -14,6 +14,8 @@ import LeaveManagement from "./pages/LeaveManagement";
 import JobPostings from "./pages/JobPostings";
 import Interviews from "./pages/Interviews";
 import Announcements from "./pages/Announcements";
+import CandidateResumeUpload from "./pages/CandidateResumeUpload";
+import EmployeeCareerDevelopment from "./pages/EmployeeCareerDevelopment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +90,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ChatAssistant />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/candidate-resume-upload"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'hr']}>
+                  <CandidateResumeUpload />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-career-development"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <EmployeeCareerDevelopment />
                 </ProtectedRoute>
               }
             />

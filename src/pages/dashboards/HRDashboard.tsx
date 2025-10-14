@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Briefcase, Calendar, FileText, TrendingUp } from 'lucide-react';
+import { Users, Briefcase, Calendar, FileText, TrendingUp, Brain, BarChart3, UserPlus } from 'lucide-react';
 
 export const HRDashboard = () => {
   const { data: stats } = useQuery({
@@ -85,7 +85,7 @@ export const HRDashboard = () => {
         <CardHeader>
           <CardTitle>Quick Access</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
+        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <a href="/employees" className="p-4 border rounded-lg hover:bg-accent transition-colors">
             <Users className="w-6 h-6 mb-2 text-primary" />
             <h3 className="font-semibold">Manage Employees</h3>
@@ -104,7 +104,17 @@ export const HRDashboard = () => {
           <a href="/resume-screening" className="p-4 border rounded-lg hover:bg-accent transition-colors">
             <TrendingUp className="w-6 h-6 mb-2 text-primary" />
             <h3 className="font-semibold">Resume Screening</h3>
-            <p className="text-sm text-muted-foreground">AI-powered candidate analysis</p>
+            <p className="text-sm text-muted-foreground">Legacy resume analysis</p>
+          </a>
+          <a href="/candidate-resume-upload" className="p-4 border rounded-lg hover:bg-accent transition-colors bg-gradient-primary text-white">
+            <Brain className="w-6 h-6 mb-2" />
+            <h3 className="font-semibold">AI Resume Analysis</h3>
+            <p className="text-sm opacity-90">Advanced AI insights & ranking</p>
+          </a>
+          <a href="/recruitment-analytics" className="p-4 border rounded-lg hover:bg-accent transition-colors">
+            <BarChart3 className="w-6 h-6 mb-2 text-primary" />
+            <h3 className="font-semibold">Recruitment Analytics</h3>
+            <p className="text-sm text-muted-foreground">AI-powered hiring insights</p>
           </a>
         </CardContent>
       </Card>

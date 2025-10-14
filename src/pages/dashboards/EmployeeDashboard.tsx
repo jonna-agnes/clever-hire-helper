@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, FileText, MessageSquare, Award } from 'lucide-react';
+import { Calendar, FileText, MessageSquare, Award, TrendingUp, BookOpen, Target } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -158,7 +158,7 @@ export const EmployeeDashboard = () => {
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
+        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <a href="/leave-management" className="p-4 border rounded-lg hover:bg-accent transition-colors">
             <Calendar className="w-6 h-6 mb-2 text-primary" />
             <h3 className="font-semibold">Request Leave</h3>
@@ -168,6 +168,21 @@ export const EmployeeDashboard = () => {
             <MessageSquare className="w-6 h-6 mb-2 text-primary" />
             <h3 className="font-semibold">HR Assistant</h3>
             <p className="text-sm text-muted-foreground">Get help with HR questions</p>
+          </a>
+          <a href="/employee-career-development" className="p-4 border rounded-lg hover:bg-accent transition-colors bg-gradient-primary text-white">
+            <TrendingUp className="w-6 h-6 mb-2" />
+            <h3 className="font-semibold">Career Development</h3>
+            <p className="text-sm opacity-90">AI career coach & insights</p>
+          </a>
+          <a href="/internal-jobs" className="p-4 border rounded-lg hover:bg-accent transition-colors">
+            <Target className="w-6 h-6 mb-2 text-primary" />
+            <h3 className="font-semibold">Internal Opportunities</h3>
+            <p className="text-sm text-muted-foreground">AI-matched job recommendations</p>
+          </a>
+          <a href="/learning-path" className="p-4 border rounded-lg hover:bg-accent transition-colors">
+            <BookOpen className="w-6 h-6 mb-2 text-primary" />
+            <h3 className="font-semibold">Learning Path</h3>
+            <p className="text-sm text-muted-foreground">Personalized skill development</p>
           </a>
         </CardContent>
       </Card>
