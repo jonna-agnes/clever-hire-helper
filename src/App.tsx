@@ -18,6 +18,7 @@ import CandidateResumeUpload from "./pages/CandidateResumeUpload";
 import EmployeeCareerDevelopment from "./pages/EmployeeCareerDevelopment";
 import InternalJobs from "./pages/InternalJobs";
 import LearningPath from "./pages/LearningPath";
+import RecruitmentAnalytics from "./pages/RecruitmentAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -124,6 +125,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
                   <LearningPath />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recruitment-analytics"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'hr']}>
+                  <RecruitmentAnalytics />
                 </ProtectedRoute>
               }
             />

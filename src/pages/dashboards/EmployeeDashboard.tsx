@@ -6,6 +6,7 @@ import { Calendar, FileText, MessageSquare, Award, TrendingUp, BookOpen, Target 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { RoleBasedChatAssistant } from '@/components/RoleBasedChatAssistant';
 
 export const EmployeeDashboard = () => {
   const { user } = useAuth();
@@ -52,13 +53,13 @@ export const EmployeeDashboard = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h2 className="text-3xl font-bold mb-2">Employee Dashboard</h2>
-        <p className="text-muted-foreground">Welcome back, {employeeData?.employee?.full_name || 'Employee'}!</p>
+        <h2 className="text-2xl md:text-3xl font-bold mb-2">Employee Dashboard</h2>
+        <p className="text-sm md:text-base text-muted-foreground">Welcome back, {employeeData?.employee?.full_name || 'Employee'}!</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">My Leave Requests</CardTitle>
@@ -154,11 +155,13 @@ export const EmployeeDashboard = () => {
         </CardContent>
       </Card>
 
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <a href="/leave-management" className="p-4 border rounded-lg hover:bg-accent transition-colors">
             <Calendar className="w-6 h-6 mb-2 text-primary" />
             <h3 className="font-semibold">Request Leave</h3>
@@ -184,8 +187,13 @@ export const EmployeeDashboard = () => {
             <h3 className="font-semibold">Learning Path</h3>
             <p className="text-sm text-muted-foreground">Personalized skill development</p>
           </a>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+        <div>
+          <RoleBasedChatAssistant />
+        </div>
+      </div>
     </div>
   );
 };

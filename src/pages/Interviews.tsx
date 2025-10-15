@@ -107,24 +107,25 @@ const Interviews = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-subtle">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
+      <main className="container mx-auto px-4 py-4 md:py-8">
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Interview Scheduler
             </h1>
-            <p className="text-muted-foreground mt-2">Schedule and manage candidate interviews</p>
+            <p className="text-sm md:text-base text-muted-foreground mt-2">Schedule and manage candidate interviews</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full md:w-auto">
                 <Calendar className="w-4 h-4 mr-2" />
-                Schedule Interview
+                <span className="hidden sm:inline">Schedule Interview</span>
+                <span className="sm:hidden">Schedule</span>
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md md:max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Schedule New Interview</DialogTitle>
                 <DialogDescription>Enter candidate and interview details</DialogDescription>
@@ -211,7 +212,7 @@ const Interviews = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid md:grid-cols-3 gap-4">
+                  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Position</p>
                       <p className="font-medium">{interview.job_postings?.title || 'N/A'}</p>

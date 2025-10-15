@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Briefcase, Calendar, FileText, TrendingUp, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const AdminDashboard = () => {
+  const [selectedModal, setSelectedModal] = useState<string | null>(null);
+  
   const { data: stats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
@@ -112,9 +117,13 @@ export const AdminDashboard = () => {
         <p className="text-muted-foreground">Complete system overview and management</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat, index) => (
-          <Card key={index} className="shadow-lg">
+          <Card 
+            key={index} 
+            className="shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+            onClick={() => setSelectedModal(stat.title)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
               <div className={`w-10 h-10 ${stat.gradient} rounded-lg flex items-center justify-center shadow-glow`}>
@@ -129,11 +138,16 @@ export const AdminDashboard = () => {
         ))}
       </div>
 
+      <StatDetailsModal 
+        title={selectedModal} 
+        onClose={() => setSelectedModal(null)} 
+      />
+
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>Quick Access</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <a href="/employees" className="p-4 border rounded-lg hover:bg-accent transition-colors">
             <Users className="w-6 h-6 mb-2 text-primary" />
             <h3 className="font-semibold">Manage Employees</h3>
@@ -164,8 +178,171 @@ export const AdminDashboard = () => {
             <h3 className="font-semibold">Resume Screening</h3>
             <p className="text-sm text-muted-foreground">AI-powered candidate analysis</p>
           </a>
+          <a href="/candidate-resume-upload" className="p-4 border rounded-lg hover:bg-accent transition-colors">
+            <FileText className="w-6 h-6 mb-2 text-primary" />
+            <h3 className="font-semibold">AI Resume Analysis</h3>
+            <p className="text-sm text-muted-foreground">Upload and analyze resumes</p>
+          </a>
         </CardContent>
       </Card>
     </div>
   );
 };
+
+function StatDetailsModal({ title, onClose }: { title: string | null; onClose: () => void }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['stat-details', title],
+    queryFn: async () => {
+      if (!title) return null;
+      
+      switch (title) {
+        case 'Total Employees':
+          const { data: employees } = await supabase.from('employees').select('*');
+          return { type: 'employees', data: employees };
+        case 'Job Postings':
+          const { data: jobs } = await supabase.from('job_postings').select('*');
+          return { type: 'jobs', data: jobs };
+        case 'Interviews':
+          const { data: interviews } = await supabase.from('interviews').select('*');
+          return { type: 'interviews', data: interviews };
+        case 'Pending Leaves':
+          const { data: leaves } = await supabase.from('leave_requests').select('*, employees(full_name)').eq('status', 'pending');
+          return { type: 'leaves', data: leaves };
+        case 'Resume Screenings':
+          const { data: screenings } = await supabase.from('resume_screenings').select('*');
+          return { type: 'screenings', data: screenings };
+        default:
+          return null;
+      }
+    },
+    enabled: !!title,
+  });
+
+  if (!title) return null;
+
+  return (
+    <Dialog open={!!title} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="flex justify-center p-8">Loading...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            {data?.type === 'employees' && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.data?.map((emp: any) => (
+                    <TableRow key={emp.id}>
+                      <TableCell>{emp.full_name}</TableCell>
+                      <TableCell>{emp.position}</TableCell>
+                      <TableCell>{emp.department}</TableCell>
+                      <TableCell><Badge>{emp.status}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            {data?.type === 'jobs' && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.data?.map((job: any) => (
+                    <TableRow key={job.id}>
+                      <TableCell>{job.title}</TableCell>
+                      <TableCell>{job.department}</TableCell>
+                      <TableCell>{job.job_type}</TableCell>
+                      <TableCell><Badge>{job.status}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            {data?.type === 'interviews' && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Candidate</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.data?.map((interview: any) => (
+                    <TableRow key={interview.id}>
+                      <TableCell>{interview.candidate_name}</TableCell>
+                      <TableCell>{interview.interview_type}</TableCell>
+                      <TableCell>{new Date(interview.interview_date).toLocaleDateString()}</TableCell>
+                      <TableCell><Badge>{interview.status}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            {data?.type === 'leaves' && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.data?.map((leave: any) => (
+                    <TableRow key={leave.id}>
+                      <TableCell>{leave.employees?.full_name}</TableCell>
+                      <TableCell>{leave.leave_type}</TableCell>
+                      <TableCell>{new Date(leave.start_date).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(leave.end_date).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            {data?.type === 'screenings' && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Candidate</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>AI Score</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.data?.map((screening: any) => (
+                    <TableRow key={screening.id}>
+                      <TableCell>{screening.candidate_name}</TableCell>
+                      <TableCell>{screening.position_applied}</TableCell>
+                      <TableCell>{screening.ai_score}/100</TableCell>
+                      <TableCell><Badge>{screening.status}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

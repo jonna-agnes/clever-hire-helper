@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Briefcase, Calendar, FileText, TrendingUp, Brain, BarChart3, UserPlus } from 'lucide-react';
+import { RoleBasedChatAssistant } from '@/components/RoleBasedChatAssistant';
 
 export const HRDashboard = () => {
   const { data: stats } = useQuery({
@@ -59,13 +60,13 @@ export const HRDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h2 className="text-3xl font-bold mb-2">HR Dashboard</h2>
-        <p className="text-muted-foreground">Recruitment and employee management</p>
+        <h2 className="text-2xl md:text-3xl font-bold mb-2">HR Dashboard</h2>
+        <p className="text-sm md:text-base text-muted-foreground">Recruitment and employee management</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat, index) => (
           <Card key={index} className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -81,11 +82,13 @@ export const HRDashboard = () => {
         ))}
       </div>
 
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle>Quick Access</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle>Quick Access</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <a href="/employees" className="p-4 border rounded-lg hover:bg-accent transition-colors">
             <Users className="w-6 h-6 mb-2 text-primary" />
             <h3 className="font-semibold">Manage Employees</h3>
@@ -116,8 +119,13 @@ export const HRDashboard = () => {
             <h3 className="font-semibold">Recruitment Analytics</h3>
             <p className="text-sm text-muted-foreground">AI-powered hiring insights</p>
           </a>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+        <div>
+          <RoleBasedChatAssistant />
+        </div>
+      </div>
     </div>
   );
 };
