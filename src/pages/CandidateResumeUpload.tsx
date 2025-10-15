@@ -55,9 +55,12 @@ export default function CandidateResumeUpload() {
       const text = await file.text();
 
       // Call AI analysis
-      const { data: analysis } = await supabase.functions.invoke('analyze-candidate-resume', {
+      const { data: analysis, error: aiError } = await supabase.functions.invoke('analyze-candidate-resume', {
         body: { resumeText: text, position }
       });
+
+      if (aiError) throw new Error(`AI analysis failed: ${aiError.message}`);
+      if (!analysis) throw new Error('AI analysis returned no data');
 
       // Save to database
       const { error: dbError } = await supabase
@@ -69,13 +72,13 @@ export default function CandidateResumeUpload() {
           position_applied: position,
           resume_url: publicUrl,
           resume_text: text,
-          ai_summary: analysis.summary,
-          ai_skill_match: analysis.skillMatch,
-          ai_strengths: analysis.strengths,
-          ai_weaknesses: analysis.weaknesses,
-          ai_cultural_fit_score: analysis.culturalFitScore,
-          ai_red_flags: analysis.redFlags,
-          ai_overall_score: analysis.overallScore,
+          ai_summary: analysis.summary || 'No summary available',
+          ai_skill_match: analysis.skillMatch || {},
+          ai_strengths: analysis.strengths || [],
+          ai_weaknesses: analysis.weaknesses || [],
+          ai_cultural_fit_score: analysis.culturalFitScore || 0,
+          ai_red_flags: analysis.redFlags || [],
+          ai_overall_score: analysis.overallScore || 0,
           uploaded_by: user.id,
         });
 
@@ -105,13 +108,13 @@ export default function CandidateResumeUpload() {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Navigation />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">AI Resume Analysis</h1>
-          <p className="text-muted-foreground">Upload candidate resumes for comprehensive AI-powered analysis</p>
+      <div className="container mx-auto px-4 py-4 md:py-8">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2">AI Resume Analysis</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Upload candidate resumes for comprehensive AI-powered analysis</p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3 mb-8">
+        <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-6 md:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Candidates</CardTitle>
@@ -147,9 +150,9 @@ export default function CandidateResumeUpload() {
           </Card>
         </div>
 
-        <Card className="mb-8">
+        <Card className="mb-6 md:mb-8">
           <CardHeader>
-            <CardTitle>Upload New Resume</CardTitle>
+            <CardTitle className="text-lg md:text-xl">Upload New Resume</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={(e) => { e.preventDefault(); uploadMutation.mutate(); }} className="space-y-4">
@@ -220,9 +223,9 @@ export default function CandidateResumeUpload() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Candidates</CardTitle>
+            <CardTitle className="text-lg md:text-xl">Recent Candidates</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>

@@ -16,6 +16,8 @@ import Interviews from "./pages/Interviews";
 import Announcements from "./pages/Announcements";
 import CandidateResumeUpload from "./pages/CandidateResumeUpload";
 import EmployeeCareerDevelopment from "./pages/EmployeeCareerDevelopment";
+import InternalJobs from "./pages/InternalJobs";
+import LearningPath from "./pages/LearningPath";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -106,6 +108,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
                   <EmployeeCareerDevelopment />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/internal-jobs"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <InternalJobs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/learning-path"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <LearningPath />
                 </ProtectedRoute>
               }
             />

@@ -91,13 +91,16 @@ export default function EmployeeCareerDevelopment() {
 
       // Read and analyze
       const text = await file.text();
-      const { data: analysis } = await supabase.functions.invoke('analyze-employee-career', {
+      const { data: analysis, error: aiError } = await supabase.functions.invoke('analyze-employee-career', {
         body: {
           resumeText: text,
           currentPosition: employee.position,
           performanceData: {},
         }
       });
+
+      if (aiError) throw new Error(`AI analysis failed: ${aiError.message}`);
+      if (!analysis) throw new Error('AI analysis returned no data');
 
       // Save analysis
       const { error: dbError } = await supabase
@@ -106,25 +109,27 @@ export default function EmployeeCareerDevelopment() {
           employee_id: employee.id,
           resume_url: publicUrl,
           resume_text: text,
-          ai_skill_gaps: analysis.skillGaps,
-          ai_career_path: analysis.careerPath,
-          ai_learning_roadmap: analysis.learningRoadmap,
-          ai_promotion_probability: analysis.promotionProbability,
-          ai_attrition_risk: analysis.attritionRisk,
+          ai_skill_gaps: analysis.skillGaps || [],
+          ai_career_path: analysis.careerPath || {},
+          ai_learning_roadmap: analysis.learningRoadmap || [],
+          ai_promotion_probability: analysis.promotionProbability || 0,
+          ai_attrition_risk: analysis.attritionRisk || 'medium',
         });
 
       if (dbError) throw dbError;
 
       // Create learning recommendations
-      for (const item of analysis.learningRoadmap) {
-        await supabase.from('learning_recommendations').insert({
-          employee_id: employee.id,
-          skill: item.skill,
-          course_name: item.resources[0] || 'TBD',
-          platform: 'Online',
-          priority: item.priority,
-          ai_reasoning: `Recommended to close skill gap`,
-        });
+      if (analysis.learningRoadmap && Array.isArray(analysis.learningRoadmap)) {
+        for (const item of analysis.learningRoadmap) {
+          await supabase.from('learning_recommendations').insert({
+            employee_id: employee.id,
+            skill: item.skill || 'General',
+            course_name: item.resources?.[0] || 'TBD',
+            platform: 'Online',
+            priority: item.priority || 'medium',
+            ai_reasoning: `Recommended to close skill gap`,
+          });
+        }
       }
     },
     onSuccess: () => {
